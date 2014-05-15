@@ -1,0 +1,27 @@
+{
+    "name": "eleme/rlock",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hongbo Tang",
+            "email": "thbourlove@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "predis/predis": "~0.8"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "0.6.1",
+        "mockery/mockery": "0.9.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Eleme\\Rlock\\": "src/",
+            "Eleme\\Rlock\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "bin-dir": "bin/"
+    }
+}
