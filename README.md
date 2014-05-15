@@ -1,4 +1,59 @@
-rlock
-=====
+# Rlock
+[![Build Status](https://travis-ci.org/thbourlove/rlock.png?branch=master)](https://travis-ci.org/thbourlove/rlock)
+[![Coverage Status](https://coveralls.io/repos/thbourlove/rlock/badge.png?branch=master)](https://coveralls.io/r/thbourlove/rlock?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thbourlove/rlock/badges/quality-score.png?s=f113f1ab965f6aaef55e497a330caf72bff94201)](https://scrutinizer-ci.com/g/thbourlove/rlock/)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/3f166f53-7f52-4f66-9ab6-6a2ec36713f7/mini.png)](https://insight.sensiolabs.com/projects/3f166f53-7f52-4f66-9ab6-6a2ec36713f7)
+[![Stable Status](https://poser.pugx.org/eleme/rlock/v/stable.png)](https://packagist.org/packages/eleme/rlock)
 
-redis lock
+Redis lock for some atomic opration.
+
+## Install With Composer:
+
+```json
+"require": {
+    "eleme/rlock": "~0.1"
+}
+```
+
+## Usage
+
+#### With Predis client
+```php
+<?php
+
+use Eleme\Rlock\Lock;
+use Predis\Client;
+
+require_once(__DIR__.'/../vendor/autoload.php');
+
+$redis = new Client();
+
+$lock1 = new Lock($redis, 'lock1');
+$lock1->acquire();
+// release it by manually or it will be autoreleased.
+$lock1->release();
+
+
+// pass some options like timeout and interval.
+$lock2 = new Lock($redis, 'lock2', array('timeout' => 5000, 'interval' => 500));
+echo $lock2->acquire() ? 'true' : 'false', "\n";
+
+// sometimes you may need a non-block lock.
+$lock3 = new Lock($redis, 'lock3', array('blocking' => false));
+echo $lock3->acquire() ? 'true' : 'false', "\n";
+$lock4 = new Lock($redis, 'lock3', array('blocking' => false));
+echo $lock4->acquire() ? 'true' : 'false', "\n";
+```
+
+#### Use an extended Predis
+```php
+<?php
+
+use Eleme\Rlock\Predis;
+
+require_once(__DIR__.'/../vendor/autoload.php');
+
+$redis = new Predis();
+$lock = $redis->lock('lock1');
+echo $lock->acquire() ? 'true' : 'fasel', "\n";
+```
