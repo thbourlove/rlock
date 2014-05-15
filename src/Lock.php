@@ -25,7 +25,7 @@ class Lock
         $this->lockname = $lockname.$this->options['suffix'];
     }
 
-    public function lock()
+    public function acquire()
     {
         while (true) {
             $validity = $this->options['timeout'] / 1000 + microtime(true);
