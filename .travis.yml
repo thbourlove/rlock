@@ -12,3 +12,6 @@ before_script:
 
 script:
   - phpunit --coverage-text
+
+after_script:
+  - php bin/coveralls -v
