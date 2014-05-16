@@ -6,9 +6,6 @@ use Mockery;
 
 class LockTest extends \PHPUnit_Framework_TestCase
 {
-    private $redisMock = null;
-    private $lock = null;
-
     public function testAcquireSuccess()
     {
         $redis = Mockery::mock('predis');
@@ -69,7 +66,7 @@ class LockTest extends \PHPUnit_Framework_TestCase
         $lockname = 'test';
         $lock = new Lock($redis, $lockname, array('timeout' => $timeout, 'interval' => $interval));
         $beforeLocked = microtime(true);
-        $result = $lock->acquire();
+        $lock->acquire();
         $afterLocked = microtime(true);
         $this->assertTrue($beforeLocked + $timeout / 1000 <= $afterLocked);
     }
