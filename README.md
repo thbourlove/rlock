@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/thbourlove/rlock.png?branch=master)](https://travis-ci.org/thbourlove/rlock)
 [![Coverage Status](https://coveralls.io/repos/thbourlove/rlock/badge.png?branch=master)](https://coveralls.io/r/thbourlove/rlock?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thbourlove/rlock/badges/quality-score.png?s=f113f1ab965f6aaef55e497a330caf72bff94201)](https://scrutinizer-ci.com/g/thbourlove/rlock/)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/3f166f53-7f52-4f66-9ab6-6a2ec36713f7/mini.png)](https://insight.sensiolabs.com/projects/3f166f53-7f52-4f66-9ab6-6a2ec36713f7)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/c5aa62f0-0edc-42e7-af61-2800ab327065/mini.png)](https://insight.sensiolabs.com/projects/c5aa62f0-0edc-42e7-af61-2800ab327065)
 [![Stable Status](https://poser.pugx.org/eleme/rlock/v/stable.png)](https://packagist.org/packages/eleme/rlock)
 
 Redis lock for some atomic opration.
