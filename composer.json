@@ -1,5 +1,6 @@
 {
     "name": "eleme/rlock",
+    "description": "redis lock",
     "license": "MIT",
     "authors": [
         {
