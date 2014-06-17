@@ -63,6 +63,11 @@ class Lock
         return true;
     }
 
+    public function locked()
+    {
+        return $this->redis->get($this->lockname) > microtime(true);
+    }
+
     public function __destruct()
     {
         if ($this->validity !== 0) {

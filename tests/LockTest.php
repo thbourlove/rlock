@@ -59,14 +59,23 @@ class LockTest extends \PHPUnit_Framework_TestCase
         $time = microtime(true);
 
         $redis = Mockery::mock('predis');
-        $redis->shouldReceive('setnx')->andReturn(false);
-        $redis->shouldReceive('get')->andReturn($time + $timeout / 1000);
-        $redis->shouldReceive('getset')->andReturn($time + $timeout / 1000);
 
         $lockname = 'test';
         $lock = new Lock($redis, $lockname, array('timeout' => $timeout, 'interval' => $interval));
+        $lock2 = new Lock($redis, $lockname);
         $beforeLocked = microtime(true);
+
+        $redis->shouldReceive('get')->times(1)->andReturn(null);
+        $this->assertFalse($lock2->locked());
+
+        $redis->shouldReceive('get')->andReturn($time + $timeout / 1000);
+        $this->assertTrue($lock2->locked());
+
+        $redis->shouldReceive('setnx')->andReturn(false);
+        $redis->shouldReceive('get')->andReturn($time + $timeout / 1000);
+        $redis->shouldReceive('getset')->andReturn($time + $timeout / 1000);
         $lock->acquire();
+
         $afterLocked = microtime(true);
         $this->assertTrue($beforeLocked + $timeout / 1000 <= $afterLocked);
     }
