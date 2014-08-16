@@ -11,14 +11,14 @@ Redis lock for some atomic opration.
 
 ```json
 "require": {
-    "eleme/rlock": "~0.1"
+    "eleme/rlock": "~0.2"
 }
 ```
 
 ## Usage
 
-#### With Predis client
-```php
+#### Rlock
+``` php
 <?php
 
 use Eleme\Rlock\Lock;
@@ -45,7 +45,20 @@ $lock4 = new Lock($redis, 'lock3', array('blocking' => false));
 echo $lock4->acquire() ? 'true' : 'false', "\n";
 ```
 
-#### Use an extended Predis
+#### Factory
+```php
+<?php
+
+use Eleme\Rlock\Factory;
+use Predis\Client;
+
+require_once(__DIR__.'/../vendor/autoload.php');
+
+$factory = new Factory(new Client);
+$lock = $factory->make('test');
+```
+
+#### Extended Predis
 ```php
 <?php
 
@@ -57,3 +70,13 @@ $redis = new Predis();
 $lock = $redis->lock('lock1');
 echo $lock->acquire() ? 'true' : 'fasel', "\n";
 ```
+
+#### Laravel
+
+##### Service Provider
+
+`'Eleme\Rlock\Provider\Laravel\RlockServiceProvider'`
+
+##### Facade
+
+`'Rlock'             => 'Eleme\Rlock\Provider\Laravel\Facade'`
