@@ -7,7 +7,7 @@ cscope:
 	rm cscope.files
 
 test:
-	phpunit --coverage-text
+	bin/phpunit --coverage-text
 
 build:
 	composer install
