@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Rlock : php redis lock">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Rlock</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/thbourlove/rlock">View on GitHub</a>
+
+          <h1 id="project_title">Rlock</h1>
+          <h2 id="project_tagline">php redis lock</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/thbourlove/rlock/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/thbourlove/rlock/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="rlock" class="anchor" href="#rlock"><span class="octicon octicon-link"></span></a>Rlock</h1>
+
+<p><a href="https://travis-ci.org/thbourlove/rlock"><img src="https://travis-ci.org/thbourlove/rlock.png?branch=master" alt="Build Status"></a>
+<a href="https://coveralls.io/r/thbourlove/rlock?branch=master"><img src="https://coveralls.io/repos/thbourlove/rlock/badge.png?branch=master" alt="Coverage Status"></a>
+<a href="https://scrutinizer-ci.com/g/thbourlove/rlock/"><img src="https://scrutinizer-ci.com/g/thbourlove/rlock/badges/quality-score.png?s=f113f1ab965f6aaef55e497a330caf72bff94201" alt="Scrutinizer Code Quality"></a>
+<a href="https://insight.sensiolabs.com/projects/c5aa62f0-0edc-42e7-af61-2800ab327065"><img src="https://insight.sensiolabs.com/projects/c5aa62f0-0edc-42e7-af61-2800ab327065/mini.png" alt="SensioLabsInsight"></a>
+<a href="https://packagist.org/packages/eleme/rlock"><img src="https://poser.pugx.org/eleme/rlock/v/stable.png" alt="Stable Status"></a></p>
+
+<p>Redis lock for some atomic opration.</p>
+
+<h2>
+<a name="install-with-composer" class="anchor" href="#install-with-composer"><span class="octicon octicon-link"></span></a>Install With Composer:</h2>
+
+<div class="highlight highlight-json"><pre><span class="s2">"require"</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">"eleme/rlock"</span><span class="p">:</span> <span class="s2">"~0.2"</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h4>
+<a name="rlock-1" class="anchor" href="#rlock-1"><span class="octicon octicon-link"></span></a>Rlock</h4>
+
+<div class="highlight highlight-php"><pre><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">use</span> <span class="nx">Eleme\Rlock\Lock</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Predis\Client</span><span class="p">;</span>
+
+<span class="k">require_once</span><span class="p">(</span><span class="nx">__DIR__</span><span class="o">.</span><span class="s1">'/../vendor/autoload.php'</span><span class="p">);</span>
+
+<span class="nv">$redis</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Client</span><span class="p">();</span>
+
+<span class="nv">$lock1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Lock</span><span class="p">(</span><span class="nv">$redis</span><span class="p">,</span> <span class="s1">'lock1'</span><span class="p">);</span>
+<span class="nv">$lock1</span><span class="o">-&gt;</span><span class="na">acquire</span><span class="p">();</span>
+<span class="c1">// release it by manually or it will be autoreleased.</span>
+<span class="nv">$lock1</span><span class="o">-&gt;</span><span class="na">release</span><span class="p">();</span>
+
+
+<span class="c1">// pass some options like timeout and interval.</span>
+<span class="nv">$lock2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Lock</span><span class="p">(</span><span class="nv">$redis</span><span class="p">,</span> <span class="s1">'lock2'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'timeout'</span> <span class="o">=&gt;</span> <span class="mi">5000</span><span class="p">,</span> <span class="s1">'interval'</span> <span class="o">=&gt;</span> <span class="mi">500</span><span class="p">));</span>
+<span class="k">echo</span> <span class="nv">$lock2</span><span class="o">-&gt;</span><span class="na">acquire</span><span class="p">()</span> <span class="o">?</span> <span class="s1">'true'</span> <span class="o">:</span> <span class="s1">'false'</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+
+<span class="c1">// sometimes you may need a non-block lock.</span>
+<span class="nv">$lock3</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Lock</span><span class="p">(</span><span class="nv">$redis</span><span class="p">,</span> <span class="s1">'lock3'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'blocking'</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">));</span>
+<span class="k">echo</span> <span class="nv">$lock3</span><span class="o">-&gt;</span><span class="na">acquire</span><span class="p">()</span> <span class="o">?</span> <span class="s1">'true'</span> <span class="o">:</span> <span class="s1">'false'</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+<span class="nv">$lock4</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Lock</span><span class="p">(</span><span class="nv">$redis</span><span class="p">,</span> <span class="s1">'lock3'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'blocking'</span> <span class="o">=&gt;</span> <span class="k">false</span><span class="p">));</span>
+<span class="k">echo</span> <span class="nv">$lock4</span><span class="o">-&gt;</span><span class="na">acquire</span><span class="p">()</span> <span class="o">?</span> <span class="s1">'true'</span> <span class="o">:</span> <span class="s1">'false'</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+</pre></div>
+
+<h4>
+<a name="factory" class="anchor" href="#factory"><span class="octicon octicon-link"></span></a>Factory</h4>
+
+<div class="highlight highlight-php"><pre><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">use</span> <span class="nx">Eleme\Rlock\Factory</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Predis\Client</span><span class="p">;</span>
+
+<span class="k">require_once</span><span class="p">(</span><span class="nx">__DIR__</span><span class="o">.</span><span class="s1">'/../vendor/autoload.php'</span><span class="p">);</span>
+
+<span class="nv">$factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Factory</span><span class="p">(</span><span class="k">new</span> <span class="nx">Client</span><span class="p">);</span>
+<span class="nv">$lock</span> <span class="o">=</span> <span class="nv">$factory</span><span class="o">-&gt;</span><span class="na">make</span><span class="p">(</span><span class="s1">'test'</span><span class="p">);</span>
+</pre></div>
+
+<h4>
+<a name="extended-predis" class="anchor" href="#extended-predis"><span class="octicon octicon-link"></span></a>Extended Predis</h4>
+
+<div class="highlight highlight-php"><pre><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="k">use</span> <span class="nx">Eleme\Rlock\Predis</span><span class="p">;</span>
+
+<span class="k">require_once</span><span class="p">(</span><span class="nx">__DIR__</span><span class="o">.</span><span class="s1">'/../vendor/autoload.php'</span><span class="p">);</span>
+
+<span class="nv">$redis</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Predis</span><span class="p">();</span>
+<span class="nv">$lock</span> <span class="o">=</span> <span class="nv">$redis</span><span class="o">-&gt;</span><span class="na">lock</span><span class="p">(</span><span class="s1">'lock1'</span><span class="p">);</span>
+<span class="k">echo</span> <span class="nv">$lock</span><span class="o">-&gt;</span><span class="na">acquire</span><span class="p">()</span> <span class="o">?</span> <span class="s1">'true'</span> <span class="o">:</span> <span class="s1">'fasel'</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+</pre></div>
+
+<h4>
+<a name="laravel" class="anchor" href="#laravel"><span class="octicon octicon-link"></span></a>Laravel</h4>
+
+<h5>
+<a name="service-provider" class="anchor" href="#service-provider"><span class="octicon octicon-link"></span></a>Service Provider</h5>
+
+<p><code>'Eleme\Rlock\Provider\Laravel\RlockServiceProvider'</code></p>
+
+<h5>
+<a name="facade" class="anchor" href="#facade"><span class="octicon octicon-link"></span></a>Facade</h5>
+
+<p><code>'Rlock'             =&gt; 'Eleme\Rlock\Provider\Laravel\Facade'</code></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Rlock maintained by <a href="https://github.com/thbourlove">thbourlove</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
