@@ -23,6 +23,7 @@ class Lock
             'suffix' => self::DEFAULT_SUFFIX,
         ), $options);
         $this->lockname = $lockname.$this->options['suffix'];
+        register_shutdown_function(array($this, '__destruct'));
     }
 
     public function acquire()
