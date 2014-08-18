@@ -32,7 +32,7 @@ class Lock
             $validity = $this->options['timeout'] / 1000 + microtime(true);
             if ($this->redis->setnx($this->lockname, $validity)) {
                 $this->validity = $validity;
-                return true;
+                break;
             }
 
             $existing = $this->redis->get($this->lockname);
@@ -40,7 +40,7 @@ class Lock
                 $existing = $this->redis->getset($this->lockname, $validity);
                 if ($existing < microtime(true)) {
                     $this->validity = $validity;
-                    return true;
+                    break;
                 }
             }
 
@@ -49,6 +49,7 @@ class Lock
             }
             usleep($this->options['interval'] * 1000);
         }
+        return true;
     }
 
     public function release()

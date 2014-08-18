@@ -80,15 +80,58 @@ class LockTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($beforeLocked + $timeout / 1000 <= $afterLocked);
     }
 
+    public function testRelease()
+    {
+        $redis = Mockery::mock('predis');
+        $redis->shouldReceive('setnx')->andReturn(true);
+        $redis->shouldReceive('get')->andReturn(microtime(true) + 10);
+        $redis->shouldReceive('del');
+
+        $lockname = 'test';
+        $lock = new Lock($redis, $lockname);
+        $result = $lock->acquire();
+        $this->assertTrue($result);
+
+        $redis = Mockery::mock('predis');
+        $redis->shouldReceive('get')->andReturn(microtime(true) + 10);
+        $redis->shouldReceive('del');
+
+        $result = $lock->release();
+        $this->assertTrue($result);
+    }
+
     /**
      * @expectedException \RuntimeException
      */
-    public function testRelease()
+    public function testReleaseFailed()
     {
         $redis = Mockery::mock('predis');
 
         $lockname = 'test';
         $lock = new Lock($redis, $lockname);
+        $lock->release();
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testDestruct()
+    {
+        $redis = Mockery::mock('predis');
+        $redis->shouldReceive('setnx')->andReturn(true);
+        $redis->shouldReceive('get')->andReturn(microtime(true) + 10);
+        $redis->shouldReceive('del');
+
+        $lockname = 'test';
+        $lock = new Lock($redis, $lockname);
+        $result = $lock->acquire();
+        $this->assertTrue($result);
+
+        $redis = Mockery::mock('predis');
+        $redis->shouldReceive('get')->andReturn(microtime(true) + 10);
+        $redis->shouldReceive('del');
+
+        $lock->__destruct();
         $lock->release();
     }
 }
