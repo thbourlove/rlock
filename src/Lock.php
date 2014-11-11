@@ -9,6 +9,7 @@ class Lock
     const DEFAULT_TIMEOUT = 5000;
     const DEFAULT_INTERVAL = 500;
     const DEFAULT_BLOCKING = true;
+    const DEFAULT_TRANSACTION = true;
     const DEFAULT_SUFFIX = ":lock";
 
     private $lockname = '';
@@ -24,6 +25,7 @@ class Lock
             'interval' => self::DEFAULT_INTERVAL,
             'blocking' => self::DEFAULT_BLOCKING,
             'suffix' => self::DEFAULT_SUFFIX,
+            'transaction' => self::DEFAULT_TRANSACTION,
         ), $options);
         $this->lockname = $lockname.$this->options['suffix'];
     }
@@ -49,6 +51,31 @@ class Lock
         if (!$this->validity) {
             throw new \RuntimeException("Unlocked lock cannot be released!");
         }
+        return $this->options['transaction'] ? $this->releaseWithTransaction() : $this->releaseWithoutTransaction();
+    }
+
+    public function locked()
+    {
+        return $this->redis->exists($this->lockname);
+    }
+
+    public function __destruct()
+    {
+        if ($this->validity) {
+            $this->release();
+        }
+    }
+
+    private function releaseWithoutTransaction()
+    {
+        if ($this->redis->get($this->lockname) === $this->token) {
+            $this->redis->del($this->lockname);
+        }
+        return true;
+    }
+
+    private function releaseWithTransaction()
+    {
         try {
             $options = array('cas' => true, 'watch' => $this->lockname);
             $this->redis->transaction($options, function ($transaction) {
@@ -62,17 +89,5 @@ class Lock
             throw new \RuntimeException("Lock has been released by another client!");
         }
         return true;
-    }
-
-    public function locked()
-    {
-        return $this->redis->exists($this->lockname);
-    }
-
-    public function __destruct()
-    {
-        if ($this->validity) {
-            $this->release();
-        }
     }
 }
