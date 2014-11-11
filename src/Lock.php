@@ -1,6 +1,9 @@
 <?php
 namespace Eleme\Rlock;
 
+use Predis\Client;
+use Predis\Transaction\AbortedMultiExecException;
+
 class Lock
 {
     const DEFAULT_TIMEOUT = 5000;
@@ -10,10 +13,10 @@ class Lock
 
     private $lockname = '';
     private $redis = null;
-    private $validity = 0;
+    private $validity = false;
     private $options = array();
 
-    public function __construct($redis, $lockname, $options = array())
+    public function __construct(Client $redis, $lockname, $options = array())
     {
         $this->redis = $redis;
         $this->options = array_merge(array(
@@ -23,27 +26,16 @@ class Lock
             'suffix' => self::DEFAULT_SUFFIX,
         ), $options);
         $this->lockname = $lockname.$this->options['suffix'];
-        register_shutdown_function(array($this, '__destruct'));
     }
 
     public function acquire()
     {
         while (true) {
-            $validity = $this->options['timeout'] / 1000 + microtime(true);
-            if ($this->redis->setnx($this->lockname, $validity)) {
-                $this->validity = $validity;
+            $this->token = uniqid('', true);
+            if ($this->redis->set($this->lockname, $this->token, 'NX', 'PX', $this->options['timeout'])) {
+                $this->validity = true;
                 break;
             }
-
-            $existing = $this->redis->get($this->lockname);
-            if ($existing < microtime(true)) {
-                $existing = $this->redis->getset($this->lockname, $validity);
-                if ($existing < microtime(true)) {
-                    $this->validity = $validity;
-                    break;
-                }
-            }
-
             if (!$this->options['blocking']) {
                 return false;
             }
@@ -54,25 +46,32 @@ class Lock
 
     public function release()
     {
-        if ($this->validity === 0) {
+        if (!$this->validity) {
             throw new \RuntimeException("Unlocked lock cannot be released!");
         }
-        $existing = $this->redis->get($this->lockname);
-        if ($existing >= microtime(true)) {
-            $this->redis->del($this->lockname);
+        try {
+            $options = array('cas' => true, 'watch' => $this->lockname);
+            $this->redis->transaction($options, function ($transaction) {
+                if ($transaction->get($this->lockname) === $this->token) {
+                    $transaction->multi();
+                    $transaction->del($this->lockname);
+                }
+            });
+            $this->validity = false;
+        } catch (AbortedMultiExecException $e) {
+            throw new \RuntimeException("Lock has been released by another client!");
         }
-        $this->validity = 0;
         return true;
     }
 
     public function locked()
     {
-        return $this->redis->get($this->lockname) > microtime(true);
+        return $this->redis->exists($this->lockname);
     }
 
     public function __destruct()
     {
-        if ($this->validity !== 0) {
+        if ($this->validity) {
             $this->release();
         }
     }

@@ -1,4 +1,4 @@
-tags:
+ctags:
 	ctags -R --fields=+aimS --languages=php --php-kinds=cidf --exclude=tests
 
 cscope:
