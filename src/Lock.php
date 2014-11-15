@@ -68,10 +68,14 @@ class Lock
 
     private function releaseWithoutTransaction()
     {
-        if ($this->redis->get($this->lockname) === $this->token) {
-            $this->redis->del($this->lockname);
-        }
-        return true;
+        $script = '
+            if redis.call("GET", KEYS[1]) == ARGV[1] then
+                return redis.call("DEL", KEYS[1])
+            else
+                return 0
+            end
+         ';
+        return $this->redis->eval($script, 1, $this->lockname, $this->token);
     }
 
     private function releaseWithTransaction()
