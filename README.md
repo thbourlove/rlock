@@ -11,7 +11,7 @@ Redis lock for some atomic opration.
 
 ```json
 "require": {
-    "eleme/rlock": "~0.2"
+    "eleme/rlock": "~0.3"
 }
 ```
 
